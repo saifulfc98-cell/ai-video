@@ -1,6 +1,6 @@
 """Render the Shell Café Wow Wednesday bulletin as a 9:16 draft video.
 
-Usage: python3 tools/make_video.py <photo> <captions.srt> <out.mp4> [presenter]
+Usage: python3 tools/make_video.py <photo> <captions.srt> <out.mp4> [presenter] [full|30s]
 
 Presenter shots use the reference photo (slow zoom); B-roll shots are
 motion-graphic placeholders. Video is silent: add voiceover/music in an editor.
@@ -17,8 +17,11 @@ W, H, FPS = 1080, 1920, 30
 RED, YEL, WHITE, DARK = (221, 29, 33), (251, 206, 7), (255, 255, 255), (25, 25, 25)
 BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 REG = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-SHOTS = [(0, 11), (11, 23), (23, 38), (38, 50), (50, 57)]
-DURATION = SHOTS[-1][1]
+CUTS = {
+    "full": [(0, 11), (11, 23), (23, 38), (38, 50), (50, 57)],
+    "30s": [(0, 7), (7, 15), (15, 23), (23, 27), (27, 30)],
+}
+SHOTS = CUTS["full"]
 XFADE = 0.25
 
 _fonts = {}
@@ -236,8 +239,12 @@ class Photo:
         return Image.composite(self.black, img, self.shade)
 
 
+def dur(i):
+    return SHOTS[i][1] - SHOTS[i][0]
+
+
 def shot1(t, ctx):
-    p = t / 11
+    p = t / dur(0)
     img = ctx["photo"].frame(1.0 + 0.08 * p, 0.45, 0.45)
     breaking_badge(img, t)
     name_super(img, t, ctx["name"])
@@ -248,8 +255,9 @@ def shot1(t, ctx):
 def shot2(t, ctx):
     img = ctx["bg_coffee"].copy()
     d = ImageDraw.Draw(img)
-    phase = min(int(t // 4), 2)
-    lt = t - phase * 4
+    plen = dur(1) / 3
+    phase = min(int(t // plen), 2)
+    lt = t - phase * plen
     labels = ["ESPRESSO SEGAR", "SUSU BERBUIH LEMBUT", "SEDIA UNTUK ANDA"]
     pop = 1 + 0.12 * math.sin(min(lt, 0.5) / 0.5 * math.pi) if phase == 2 else 1
     cup(d, W / 2, 790, 1.25 * pop, steam_t=t, foam=ease(lt / 2) if phase >= 1 else 0)
@@ -272,14 +280,15 @@ def shot2(t, ctx):
 
 
 def shot3(t, ctx):
-    if t < 5:
+    plen = dur(2) / 3
+    if t < plen:
         img = ctx["bg_red"].copy()
         phone(img, t, "app")
-    elif t < 10:
+    elif t < 2 * plen:
         img = ctx["bg_red"].copy()
-        phone(img, t - 5, "qr")
+        phone(img, (t - plen) * 5 / plen, "qr")
     else:
-        lt = t - 10
+        lt = t - 2 * plen
         img = ctx["bg_warm"].copy()
         d = ImageDraw.Draw(img)
         d.rounded_rectangle([120, 560, 960, 960], 30, fill=(70, 70, 75))
@@ -298,7 +307,7 @@ def shot3(t, ctx):
 
 
 def shot4(t, ctx):
-    p = t / 12
+    p = t / dur(3)
     img = ctx["photo"].frame(1.12 + 0.03 * p, 0.42, 0.40)
     breaking_badge(img, t)
     lower_third(img, t - 0.2, "TERSEDIA DI SHELL CAFÉ TERPILIH", "Hari Rabu Sahaja")
@@ -351,7 +360,9 @@ def render(t, ctx):
 
 def main():
     photo, srt, out = sys.argv[1:4]
+    global SHOTS
     name = sys.argv[4] if len(sys.argv) > 4 else "Haslam"
+    SHOTS = CUTS[sys.argv[5] if len(sys.argv) > 5 else "full"]
     ctx = {
         "photo": Photo(photo), "name": name, "cues": parse_srt(srt),
         "bg_coffee": gradient((45, 24, 14), (130, 70, 35)),
@@ -365,7 +376,7 @@ def main():
          "-c:v", "libx264", "-preset", "medium", "-crf", "21", "-pix_fmt", "yuv420p",
          "-c:a", "aac", "-shortest", "-movflags", "+faststart", out],
         stdin=subprocess.PIPE)
-    for n in range(DURATION * FPS):
+    for n in range(SHOTS[-1][1] * FPS):
         ff.stdin.write(render(n / FPS, ctx).tobytes())
     ff.stdin.close()
     sys.exit(ff.wait())

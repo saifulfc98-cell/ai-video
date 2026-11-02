@@ -1,0 +1,31 @@
+1
+00:00:00,300 --> 00:00:03,500
+Berita baik untuk penggemar kopi!
+
+2
+00:00:03,500 --> 00:00:07,000
+Shell Café Wow Wednesday kini kembali.
+
+3
+00:00:07,000 --> 00:00:11,000
+Setiap hari Rabu, nikmati minuman dan sajian terpilih
+
+4
+00:00:11,000 --> 00:00:15,000
+pada harga istimewa.
+
+5
+00:00:15,000 --> 00:00:19,000
+Caranya mudah: imbas aplikasi Shell
+
+6
+00:00:19,000 --> 00:00:23,000
+semasa bayar di kaunter.
+
+7
+00:00:23,000 --> 00:00:26,500
+Singgah Shell Café berhampiran anda.
+
+8
+00:00:26,500 --> 00:00:30,000
+Saya Haslam, kembali ke studio.

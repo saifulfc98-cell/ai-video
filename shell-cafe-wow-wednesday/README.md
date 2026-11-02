@@ -28,7 +28,7 @@
 
 ## Video draf
 
-[`output/wow-wednesday-draf.mp4`](output/wow-wednesday-draf.mp4): 57 s, 1080×1920, sari kata tertanam, **tanpa suara** (tambah VO Haslam & muzik di CapCut).
+[`output/wow-wednesday-draf.mp4`](output/wow-wednesday-draf.mp4): 57 s; [`output/wow-wednesday-30s.mp4`](output/wow-wednesday-30s.mp4): 30 s (guna `captions-30s.srt` + argumen `30s`), 1080×1920, sari kata tertanam, **tanpa suara** (tambah VO Haslam & muzik di CapCut).
 Jana semula selepas ubah `captions.srt`:
 
 ```
