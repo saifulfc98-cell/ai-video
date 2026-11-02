@@ -16,6 +16,8 @@
 | [`teleprompter.txt`](teleprompter.txt) | Dialog sahaja, untuk dibaca semasa rakaman |
 | [`captions.srt`](captions.srt) | Sari kata – import terus ke CapCut / Premiere / TikTok |
 | [`ai-prompts.md`](ai-prompts.md) | Prompt untuk jana B-roll & animasi penyampai dengan AI |
+| [`script-30s.md`](script-30s.md) | Versi pendek 30 saat |
+| [`caption-tiktok.md`](caption-tiktok.md) | Caption, hashtag & teks pin komen |
 
 ## Sebelum terbit – semak
 
