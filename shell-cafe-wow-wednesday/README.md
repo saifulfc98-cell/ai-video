@@ -25,3 +25,13 @@
 - [ ] Dapatkan kebenaran guna logo & muzik/audio logo Shell.
 - [ ] Label **#iklan / kandungan berbayar** jika ini kerjasama berbayar.
 - [ ] Kebenaran rakaman di premis stesen & pelanggan yang muncul dalam B-roll.
+
+## Video draf
+
+[`output/wow-wednesday-draf.mp4`](output/wow-wednesday-draf.mp4): 57 s, 1080×1920, sari kata tertanam, **tanpa suara** (tambah VO Haslam & muzik di CapCut).
+Jana semula selepas ubah `captions.srt`:
+
+```
+python3 tools/make_video.py shell-cafe-wow-wednesday/assets/presenter-reference.jpg \
+  shell-cafe-wow-wednesday/captions.srt shell-cafe-wow-wednesday/output/wow-wednesday-draf.mp4 Haslam
+```
