@@ -160,10 +160,12 @@ def render(t, ctx):
 def main():
     global SHOTS, FNS
     SHOTS, FNS, srt, out, (c0, cdur), host, name, role = VERSIONS[sys.argv[1] if len(sys.argv) > 1 else "v1"]
+    if len(sys.argv) > 3:  # optional: <captions.srt> <out.mp4> overrides
+        srt, out = sys.argv[2], sys.argv[3]
     ctx = {
         "host": mv.Photo(f"{D}/assets/{host}"), "name": name, "role": role,
         "prod": mv.Photo(f"{D}/assets/produk-kaunter.jpg"),
-        "cues": mv.parse_srt(f"{D}/{srt}"),
+        "cues": mv.parse_srt(srt if "/" in srt else f"{D}/{srt}"),
         "cards": Clip(f"{D}/assets/rakaman-closeup.mp4", c0, cdur, LANDSCAPE),
         "pan": Clip(f"{D}/assets/rakaman-pan-kaunter.mp4", 0, 6.5, PORTRAIT),
         "cars": Clip(f"{D}/assets/rakaman-closeup.mp4", 16.0, 5.0, LANDSCAPE),
@@ -173,7 +175,7 @@ def main():
          "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
          "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo",
          "-c:v", "libx264", "-crf", "21", "-pix_fmt", "yuv420p",
-         "-c:a", "aac", "-shortest", "-movflags", "+faststart", f"{D}/output/{out}"],
+         "-c:a", "aac", "-shortest", "-movflags", "+faststart", out if "/" in out else f"{D}/output/{out}"],
         stdin=subprocess.PIPE)
     for n in range(SHOTS[-1][1] * FPS):
         ff.stdin.write(render(n / FPS, ctx).tobytes())

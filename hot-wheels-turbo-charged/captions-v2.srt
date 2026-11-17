@@ -1,55 +1,56 @@
 1
-00:00:00,300 --> 00:00:03,200
+00:00:00,300 --> 00:00:02,759
 Salam sejahtera kepada semua peminat setia
 
 2
-00:00:03,200 --> 00:00:06,200
+00:00:02,759 --> 00:00:05,013
 dan pengumpul barangan die-cast di luar sana!
 
 3
-00:00:06,200 --> 00:00:09,200
+00:00:05,013 --> 00:00:08,804
 Berita baik untuk anda kerana koleksi terbaharu yang dinanti-nantikan
 
 4
-00:00:09,200 --> 00:00:11,000
+00:00:08,804 --> 00:00:10,699
 kini sudah mula mencuri tumpuan.
 
 5
-00:00:11,000 --> 00:00:14,500
+00:00:11,000 --> 00:00:14,584
 Menampilkan pelbagai model kereta mainan Hot Wheels yang bergaya,
 
 6
-00:00:14,500 --> 00:00:17,500
+00:00:14,584 --> 00:00:17,483
 lengkap bersama pek kad Touch 'n Go edisi khas
 
 7
-00:00:17,500 --> 00:00:19,300
+00:00:17,483 --> 00:00:19,011
 bertemakan Turbo Charged
 
 8
-00:00:19,300 --> 00:00:22,000
+00:00:19,011 --> 00:00:21,699
 dalam pilihan warna kuning dan merah yang memukau!
 
 9
-00:00:22,000 --> 00:00:25,500
+00:00:22,000 --> 00:00:26,150
 Bagi anda yang memburu koleksi edisi terhad tahun 2026 ini,
 
 10
-00:00:25,500 --> 00:00:28,500
+00:00:26,150 --> 00:00:29,350
 pastikan anda tidak lepaskan peluang untuk mendapatkannya
 
 11
-00:00:28,500 --> 00:00:30,500
+00:00:29,350 --> 00:00:30,800
 sementara stok masih ada.
 
 12
-00:00:30,500 --> 00:00:34,000
+00:00:30,800 --> 00:00:33,699
 Dapatkan segera di lokasi terpilih berdekatan anda!
 
 13
-00:00:34,000 --> 00:00:36,500
+00:00:34,000 --> 00:00:37,158
 Saya Ain Salsabila, melaporkan untuk anda.
 
 14
-00:00:36,500 --> 00:00:40,000
+00:00:37,158 --> 00:00:41,181
 Teruskan bersama kami untuk info terkini yang lebih menarik!
+
