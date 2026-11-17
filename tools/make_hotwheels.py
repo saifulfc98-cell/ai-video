@@ -1,10 +1,11 @@
 """Render the Hot Wheels x Touch 'n Go "Turbo Charged" bulletin (40 s, 9:16, silent).
 
-Usage (from repo root): PYTHONPATH=tools python3 tools/make_hotwheels.py
+Usage (from repo root): PYTHONPATH=tools python3 tools/make_hotwheels.py [v1|v2]
 Reuses the overlays from make_video.py. Product shots use the real phone footage
 (landscape clips sit on a blurred copy of themselves); the end card uses the photo.
 """
 import subprocess
+import sys
 
 from PIL import Image, ImageDraw
 
@@ -91,6 +92,59 @@ def shot5(t, ctx):
 FNS = [shot1, shot2, shot3, shot4, shot5]
 
 
+# ---------- v2: skrip hebahan "Tiba Lagi!" ----------
+
+def v2_shot1(t, ctx):
+    return shot_presenter(t, ctx, 1.0 + 0.08 * t / 11, "HOT WHEELS TIBA LAGI!",
+                          "Bersama kad Touch 'n Go 'Turbo Charged'", name=True)
+
+
+def v2_shot2(t, ctx):
+    img = ctx["pan"].frame(t) if t < 6.4 else ctx["cars"].frame(t - 6.4)
+    mv.lower_third(img, t, "MODEL KERETA HOT WHEELS", "+ Kad Touch 'n Go edisi khas")
+    return img
+
+
+def v2_shot3(t, ctx):
+    if t < 5.5:
+        p = mv.ease(t / 5.5)
+        img = ctx["prod"].frame(1.6, 0.6 - 0.15 * p, 0.12 + 0.43 * p)
+    else:
+        img = ctx["cards"].frame(t - 5.5)
+    mv.lower_third(img, t, "KOLEKSI EDISI 2026", "Dapatkan sementara stok masih ada")
+    return img
+
+
+def v2_shot4(t, ctx):
+    return shot_presenter(t, ctx, 1.12 + 0.03 * t / 6, "HASLAM MELAPORKAN",
+                          "Info terkini bersama kami")
+
+
+def v2_shot5(t, ctx):
+    img = ctx["prod"].frame(1.0 + 0.04 * t / 3, 0.5, 0.5)
+    img = Image.blend(img, Image.new("RGB", (W, H), (0, 0, 0)), 0.45)
+    d = ImageDraw.Draw(img)
+    a = mv.ease(t / 0.5)
+    mv.centered(d, 760 - 60 * (1 - a), "TURBO", mv.font(120), mv.YEL, stroke=6)
+    mv.centered(d, 895 - 60 * (1 - a), "CHARGED", mv.font(120), mv.WHITE, stroke=6)
+    b = mv.ease((t - 0.5) / 0.5)
+    bw = 720 * b
+    if bw > 10:
+        d.rounded_rectangle([W / 2 - bw / 2, 1390, W / 2 + bw / 2, 1500], 55, fill=mv.RED)
+        if b > 0.8:
+            mv.centered(d, 1415, "Di lokasi terpilih", mv.font(54), mv.WHITE)
+    return img
+
+
+VERSIONS = {
+    "v1": ([(0, 8), (8, 18), (18, 28), (28, 36), (36, 40)], FNS, "captions.srt",
+           "hot-wheels-draf.mp4", (2.0, 10.5)),
+    "v2": ([(0, 11), (11, 22), (22, 34), (34, 40), (40, 43)],
+           [v2_shot1, v2_shot2, v2_shot3, v2_shot4, v2_shot5], "captions-v2.srt",
+           "hot-wheels-v2.mp4", (2.0, 7.0)),
+}
+
+
 def render(t, ctx):
     idx = next(i for i, (s, e) in enumerate(SHOTS) if t < e or i == len(SHOTS) - 1)
     s = SHOTS[idx][0]
@@ -103,20 +157,22 @@ def render(t, ctx):
 
 
 def main():
+    global SHOTS, FNS
+    SHOTS, FNS, srt, out, (c0, cdur) = VERSIONS[sys.argv[1] if len(sys.argv) > 1 else "v1"]
     ctx = {
         "host": mv.Photo(f"{D}/assets/presenter-reference.jpg"),
         "prod": mv.Photo(f"{D}/assets/produk-kaunter.jpg"),
-        "cues": mv.parse_srt(f"{D}/captions.srt"),
-        "cards": Clip(f"{D}/assets/rakaman-closeup.mp4", 2.0, 10.5, LANDSCAPE),
+        "cues": mv.parse_srt(f"{D}/{srt}"),
+        "cards": Clip(f"{D}/assets/rakaman-closeup.mp4", c0, cdur, LANDSCAPE),
         "pan": Clip(f"{D}/assets/rakaman-pan-kaunter.mp4", 0, 6.5, PORTRAIT),
-        "cars": Clip(f"{D}/assets/rakaman-closeup.mp4", 16.5, 4.2, LANDSCAPE),
+        "cars": Clip(f"{D}/assets/rakaman-closeup.mp4", 16.0, 5.0, LANDSCAPE),
     }
     ff = subprocess.Popen(
         ["ffmpeg", "-y", "-loglevel", "error",
          "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
          "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo",
          "-c:v", "libx264", "-crf", "21", "-pix_fmt", "yuv420p",
-         "-c:a", "aac", "-shortest", "-movflags", "+faststart", f"{D}/output/hot-wheels-draf.mp4"],
+         "-c:a", "aac", "-shortest", "-movflags", "+faststart", f"{D}/output/{out}"],
         stdin=subprocess.PIPE)
     for n in range(SHOTS[-1][1] * FPS):
         ff.stdin.write(render(n / FPS, ctx).tobytes())
