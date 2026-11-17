@@ -1,0 +1,130 @@
+"""Render the Hot Wheels x Touch 'n Go "Turbo Charged" bulletin (40 s, 9:16, silent).
+
+Usage (from repo root): PYTHONPATH=tools python3 tools/make_hotwheels.py
+Reuses the overlays from make_video.py. Product shots use the real phone footage
+(landscape clips sit on a blurred copy of themselves); the end card uses the photo.
+"""
+import subprocess
+
+from PIL import Image, ImageDraw
+
+import make_video as mv
+
+D = "hot-wheels-turbo-charged"
+SHOTS = [(0, 8), (8, 18), (18, 28), (28, 36), (36, 40)]
+W, H, FPS = mv.W, mv.H, mv.FPS
+
+
+def shot_presenter(t, ctx, z, title, sub, name=False):
+    img = ctx["host"].frame(z, 0.45, 0.45)
+    mv.breaking_badge(img, t)
+    if name:
+        mv.name_super(img, t, "Haslam")
+    mv.lower_third(img, t - 0.3, title, sub)
+    return img
+
+
+def shot1(t, ctx):
+    return shot_presenter(t, ctx, 1.0 + 0.08 * t / 8, "HOT WHEELS × TOUCH 'n GO",
+                          "Kad Edisi 'Turbo Charged' Kini Tiba", name=True)
+
+
+PORTRAIT = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"
+LANDSCAPE = ("split[a][b];[a]scale=1080:1920:force_original_aspect_ratio=increase,"
+             "crop=1080:1920,boxblur=30,eq=brightness=-0.15[bg];"
+             "[b]scale=-2:1000,crop=1080:1000[fg];[bg][fg]overlay=0:300")
+
+
+class Clip:
+    """Reads one segment of a phone clip as 1080x1920 frames, in order."""
+
+    def __init__(self, path, start, dur, vf):
+        self.proc = subprocess.Popen(
+            ["ffmpeg", "-v", "error", "-ss", str(start), "-t", str(dur), "-i", path,
+             "-vf", f"fps={FPS},{vf}", "-an", "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
+            stdout=subprocess.PIPE)
+        self.n, self.last = -1, None
+
+    def frame(self, t):
+        want = int(t * FPS)
+        while self.n < want:
+            buf = self.proc.stdout.read(W * H * 3)
+            if len(buf) < W * H * 3:
+                break
+            self.last, self.n = Image.frombytes("RGB", (W, H), buf), self.n + 1
+        return self.last.copy()
+
+
+def shot2(t, ctx):
+    img = ctx["cards"].frame(t)
+    mv.lower_third(img, t, "KAD TOUCH 'n GO ENHANCED", "Edisi Turbo Charged – Kuning & Merah")
+    return img
+
+
+def shot3(t, ctx):
+    img = ctx["pan"].frame(t) if t < 6.4 else ctx["cars"].frame(t - 6.4)
+    mv.lower_third(img, t, "KOLEKSI KERETA HOT WHEELS", "Kereta sport & kereta rali")
+    return img
+
+
+def shot4(t, ctx):
+    return shot_presenter(t, ctx, 1.12 + 0.03 * t / 8, "KINI DI KAUNTER KAMI",
+                          "Tanya staf untuk butiran lanjut")
+
+
+def shot5(t, ctx):
+    img = ctx["prod"].frame(1.0 + 0.04 * t / 4, 0.5, 0.5)
+    img = Image.blend(img, Image.new("RGB", (W, H), (0, 0, 0)), 0.45)
+    d = ImageDraw.Draw(img)
+    a = mv.ease(t / 0.5)
+    mv.centered(d, 760 - 60 * (1 - a), "SINGGAH", mv.font(110), mv.YEL, stroke=6)
+    mv.centered(d, 890 - 60 * (1 - a), "& KUMPUL!", mv.font(100), mv.WHITE, stroke=6)
+    b = mv.ease((t - 0.5) / 0.5)
+    bw = 680 * b
+    if bw > 10:
+        d.rounded_rectangle([W / 2 - bw / 2, 1390, W / 2 + bw / 2, 1500], 55, fill=mv.RED)
+        if b > 0.8:
+            mv.centered(d, 1415, "Tanya di kaunter", mv.font(54), mv.WHITE)
+    return img
+
+
+FNS = [shot1, shot2, shot3, shot4, shot5]
+
+
+def render(t, ctx):
+    idx = next(i for i, (s, e) in enumerate(SHOTS) if t < e or i == len(SHOTS) - 1)
+    s = SHOTS[idx][0]
+    img = FNS[idx](t - s, ctx)
+    if idx > 0 and t - s < mv.XFADE:
+        prev = FNS[idx - 1](t - SHOTS[idx - 1][0], ctx)
+        img = Image.blend(prev, img, (t - s) / mv.XFADE)
+    mv.captions(img, t, ctx["cues"])
+    return img
+
+
+def main():
+    ctx = {
+        "host": mv.Photo(f"{D}/assets/presenter-reference.jpg"),
+        "prod": mv.Photo(f"{D}/assets/produk-kaunter.jpg"),
+        "cues": mv.parse_srt(f"{D}/captions.srt"),
+        "cards": Clip(f"{D}/assets/rakaman-closeup.mp4", 2.0, 10.5, LANDSCAPE),
+        "pan": Clip(f"{D}/assets/rakaman-pan-kaunter.mp4", 0, 6.5, PORTRAIT),
+        "cars": Clip(f"{D}/assets/rakaman-closeup.mp4", 16.5, 4.2, LANDSCAPE),
+    }
+    ff = subprocess.Popen(
+        ["ffmpeg", "-y", "-loglevel", "error",
+         "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
+         "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo",
+         "-c:v", "libx264", "-crf", "21", "-pix_fmt", "yuv420p",
+         "-c:a", "aac", "-shortest", "-movflags", "+faststart", f"{D}/output/hot-wheels-draf.mp4"],
+        stdin=subprocess.PIPE)
+    for n in range(SHOTS[-1][1] * FPS):
+        ff.stdin.write(render(n / FPS, ctx).tobytes())
+    ff.stdin.close()
+    for k in ("cards", "pan", "cars"):
+        ctx[k].proc.kill()
+    raise SystemExit(ff.wait())
+
+
+if __name__ == "__main__":
+    main()
