@@ -26,7 +26,7 @@ python3 tools/make_audio.py mux hot-wheels-turbo-charged/output/hot-wheels-v2.mp
 
 ## Versi 3 – "Buletin Khas Kasual" (63.5 s)
 
-[`script-v3.md`](script-v3.md) · [`output/hot-wheels-v3-suara.mp4`](output/hot-wheels-v3-suara.mp4) (dengan suara & muzik) · [`captions-v3.srt`](captions-v3.srt) · trek CapCut `output/v3-audio-voice.wav`, `output/v3-audio-music.wav`
+[`script-v3.md`](script-v3.md) · [`output/hot-wheels-v3-tanpa-skrip.mp4`](output/hot-wheels-v3-tanpa-skrip.mp4) (tanpa suara, muzik & sari kata) · [`output/hot-wheels-v3-suara.mp4`](output/hot-wheels-v3-suara.mp4) (dengan suara & muzik) · [`captions-v3.srt`](captions-v3.srt) · trek CapCut `output/v3-audio-voice.wav`, `output/v3-audio-music.wav`
 
 ```
 python3 tools/make_audio.py voice hot-wheels-turbo-charged/dialog-v3.txt 63.5 hot-wheels-turbo-charged/output/v3-audio
