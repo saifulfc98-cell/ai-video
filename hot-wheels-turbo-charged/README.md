@@ -31,3 +31,5 @@ python3 tools/make_audio.py mux hot-wheels-turbo-charged/output/hot-wheels-v2.mp
 ```
 python3 tools/make_promo.py hot-wheels-turbo-charged/assets/gemini-turbo-charged.mp4 hot-wheels-turbo-charged/output/hot-wheels-promo-gempak.mp4
 ```
+
+**Versi 20 s:** [`output/hot-wheels-promo-gempak-20s.mp4`](output/hot-wheels-promo-gempak-20s.mp4). Babak lebih panjang, ditambah zoom pada kad merah ("MERAH GARANG!") dan kad kuning ("KUNING MENYALA!"), dan CTA lebih lama. Jana: tambah `20` di hujung arahan di atas (dengan nama fail output `-20s`).

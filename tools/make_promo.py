@@ -1,7 +1,7 @@
 """Turn the 10 s Gemini Hot Wheels clip (16:9) into a punchy 9:16 sales promo.
 
 Usage (from repo root):
-  python3 tools/make_promo.py <source.mp4> hot-wheels-turbo-charged/output/hot-wheels-promo-gempak.mp4
+  python3 tools/make_promo.py <source.mp4> <out.mp4> [13|20]   (length in seconds, default 13)
 
 Speed ramps, zoom punches, white flashes, camera shake, kinetic Malay sales copy,
 a "pick your colour" freeze on the cards and a pulsing CTA end card. Audio is the
@@ -20,7 +20,7 @@ BOLD = "/usr/share/fonts/opentype/inter/Inter-ExtraBold.otf"
 YEL, RED, WHITE, INK = (255, 214, 0), (230, 30, 45), (255, 255, 255), (12, 12, 12)
 
 # (out_dur, src_start, src_end, caption key) -- src speed = (end-start)/out_dur
-SEGS = [
+SEGS_13 = [
     (1.2, 2.0, 2.6, "hook"),      # sparks, slow-mo
     (1.6, 2.6, 3.4, "burst"),     # car bursts out of the card, slow-mo
     (1.4, 3.4, 4.6, "flame"),     # flames, near real time + shake
@@ -30,6 +30,19 @@ SEGS = [
     (1.4, 7.4, 8.8, "smoke"),     # smoke pass
     (2.4, 8.8, 10.0, "cta"),      # logo + CTA
 ]
+SEGS_20 = [
+    (1.6, 2.0, 2.6, "hook"),
+    (2.0, 2.6, 3.4, "burst"),
+    (1.8, 3.4, 4.6, "flame"),
+    (1.8, 4.6, 6.0, "drift"),
+    (1.6, 6.0, 7.4, "lights"),
+    (1.6, 0.3, 0.3, "red"),       # push in on the red card
+    (1.6, 0.3, 0.3, "yellow"),    # push in on the yellow card
+    (2.2, 0.3, 0.3, "pick"),
+    (2.0, 7.4, 8.8, "smoke"),
+    (3.8, 8.6, 10.0, "cta"),
+]
+SEGS = SEGS_20 if len(sys.argv) > 3 and sys.argv[3] == "20" else SEGS_13
 CUTS = np.cumsum([0] + [s[0] for s in SEGS])
 TOTAL = float(CUTS[-1])
 
@@ -50,7 +63,7 @@ def load_source(path):
     return frames, 24.0
 
 
-def compose(src, zoom, shake=(0, 0)):
+def compose(src, zoom, shake=(0, 0), cx=0.5):
     """Blurred full-bleed background + sharp zoomed foreground band in the middle."""
     im = Image.fromarray(src)
     bg = im.resize((int(1280 * H / 720), H)).crop(((int(1280 * H / 720) - W) // 2, 0,
@@ -61,7 +74,7 @@ def compose(src, zoom, shake=(0, 0)):
     fh = int(fw * 720 / 1280)
     fg = im.resize((fw, fh), Image.BILINEAR)
     band_h = min(1000, fh)
-    x0 = (fw - W) // 2 - shake[0]
+    x0 = min(max(int(cx * fw - W / 2), 0), fw - W) - shake[0]
     y0 = (fh - band_h) // 2 - shake[1]
     fg = fg.crop((x0, y0, x0 + W, y0 + band_h))
     bg.paste(fg, (0, 460 + (1000 - band_h) // 2))
@@ -126,6 +139,12 @@ def overlay(img, key, lt, dur, t):
     elif key == "lights":
         slam(img, lt, "TAP & GO", 150, 160, YEL)
         tag(img, lt, "TOL • PARKING • TRANSIT", 1530, bg=YEL, fg=INK, size=48, delay=0.2)
+    elif key in ("red", "yellow"):
+        red = key == "red"
+        slam(img, lt, "MERAH" if red else "KUNING", 110, 170, RED if red else YEL)
+        slam(img, lt, "GARANG!" if red else "MENYALA!", 290, 120, WHITE, delay=0.12)
+        tag(img, lt, "HOT WHEELS × TNG CARD", 1530, bg=RED if red else YEL,
+            fg=WHITE if red else INK, delay=0.25)
     elif key == "pick":
         slam(img, lt, "PILIH WARNA", 110, 130, WHITE)
         slam(img, lt, "KORANG!", 260, 130, YEL, delay=0.12)
@@ -180,11 +199,15 @@ def render_frame(src, fps_src, t):
         zoom = 0.72 + 0.04 * lt / dur
     if key == "cta":
         zoom = 1.0 + 0.05 * lt / dur
+    cx = 0.5
+    if key in ("red", "yellow"):
+        zoom = 1.25 + 0.15 * ease_out(lt / dur)
+        cx = 0.26 if key == "red" else 0.74
     shake = (0, 0)
     if key in ("flame", "burst") or lt < 0.15:
         amp = 14 if key == "flame" else 7
         shake = (int(amp * np.sin(t * 91)), int(amp * np.cos(t * 73)))
-    img = compose(frame, zoom, shake)
+    img = compose(frame, zoom, shake, cx)
     overlay(img, key, lt, dur, t)
     # progress bar for watch time
     d = ImageDraw.Draw(img)
