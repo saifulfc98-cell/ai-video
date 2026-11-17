@@ -23,3 +23,11 @@ cp hot-wheels-turbo-charged/output/v2-audio-captions.srt hot-wheels-turbo-charge
 PYTHONPATH=tools python3 tools/make_hotwheels.py v2
 python3 tools/make_audio.py mux hot-wheels-turbo-charged/output/hot-wheels-v2.mp4 hot-wheels-turbo-charged/output/v2-audio hot-wheels-turbo-charged/output/hot-wheels-v2-suara.mp4
 ```
+
+## Promo "Gempak" (13 s, 9:16, untuk jualan)
+
+[`output/hot-wheels-promo-gempak.mp4`](output/hot-wheels-promo-gempak.mp4): dibina daripada klip Gemini 16:9 (`assets/gemini-turbo-charged.mp4`). Ada slow-mo, zoom hentakan, kilat putih, gegaran kamera, teks jualan, babak "pilih warna" (merah/kuning) dan kad CTA "BELI DI KAUNTER". Audionya ialah SFX asal klip ditambah beat 140 BPM dan bunyi hentakan pada setiap potongan.
+
+```
+python3 tools/make_promo.py hot-wheels-turbo-charged/assets/gemini-turbo-charged.mp4 hot-wheels-turbo-charged/output/hot-wheels-promo-gempak.mp4
+```
