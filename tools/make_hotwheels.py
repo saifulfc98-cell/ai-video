@@ -120,7 +120,7 @@ def v2_shot4(t, ctx):
                           "Info terkini bersama kami")
 
 
-def v2_shot5(t, ctx):
+def v2_shot5(t, ctx, tag="Di lokasi terpilih"):
     img = ctx["prod"].frame(1.0 + 0.04 * t / 3, 0.5, 0.5)
     img = Image.blend(img, Image.new("RGB", (W, H), (0, 0, 0)), 0.45)
     d = ImageDraw.Draw(img)
@@ -132,8 +132,49 @@ def v2_shot5(t, ctx):
     if bw > 10:
         d.rounded_rectangle([W / 2 - bw / 2, 1390, W / 2 + bw / 2, 1500], 55, fill=mv.RED)
         if b > 0.8:
-            mv.centered(d, 1415, "Di lokasi terpilih", mv.font(54), mv.WHITE)
+            mv.centered(d, 1415, tag, mv.font(54), mv.WHITE)
     return img
+
+
+# ---------- v3: "Buletin Khas Kasual" (kereta = hiasan, kad = kuasa turbo) ----------
+
+def v3_shot1(t, ctx):
+    if t < 10:
+        return shot_presenter(t, ctx, 1.0 + 0.06 * t / 10, "LAPORAN KHAS GAYA HIDUP",
+                              "Trend terkini di stesen minyak", name=True)
+    if t < 16.5:
+        img = ctx["pan"].frame(t - 10)
+        mv.lower_third(img, t - 10, "SUDUT PAMERAN", "Deretan kereta mainan mewah & rali")
+        return img
+    return shot_presenter(t - 16.5, ctx, 1.1 + 0.04 * (t - 16.5) / 8, "FAKTA MENARIK",
+                          "Yang ramai terlepas pandang!")
+
+
+def v3_shot2(t, ctx):
+    img = ctx["new_cars"].frame(t)
+    mv.lower_third(img, t, "KERETA MAINAN = HIASAN", "Maskot pameran semata-mata")
+    return img
+
+
+def v3_shot3(t, ctx):
+    if t < 4:
+        img = ctx["new_cards"].frame(t)
+    elif t < 11:
+        img = ctx["cards"].frame(t - 4)
+    else:
+        p = mv.ease((t - 11) / 6)
+        img = ctx["prod"].frame(1.6, 0.6 - 0.15 * p, 0.12 + 0.43 * p)
+    mv.lower_third(img, t, "KUASA TURBO SEBENAR", "Kad Touch 'n Go Enhanced 'Turbo Charged'")
+    return img
+
+
+def v3_shot4(t, ctx):
+    return shot_presenter(t, ctx, 1.12 + 0.03 * t / 11, "DAPATKAN DI KAUNTER",
+                          "Sementara stok masih ada")
+
+
+def v3_shot5(t, ctx):
+    return v2_shot5(t, ctx, "Di kaunter berdekatan")
 
 
 VERSIONS = {
@@ -142,6 +183,10 @@ VERSIONS = {
     "v2": ([(0, 11), (11, 22), (22, 34), (34, 40), (40, 43)],
            [v2_shot1, v2_shot2, v2_shot3, v2_shot4, v2_shot5], "captions-v2.srt",
            "hot-wheels-v2.mp4", (2.0, 7.0), "presenter-ain.jpg", "Ain Salsabila",
+           "Pembaca Berita"),
+    "v3": ([(0, 24.5), (24.5, 32.5), (32.5, 49.5), (49.5, 60.5), (60.5, 63.5)],
+           [v3_shot1, v3_shot2, v3_shot3, v3_shot4, v3_shot5], "captions-v3.srt",
+           "hot-wheels-v3.mp4", (2.0, 7.0), "presenter-ain.jpg", "Ain Salsabila",
            "Pembaca Berita"),
 }
 
@@ -169,6 +214,8 @@ def main():
         "cards": Clip(f"{D}/assets/rakaman-closeup.mp4", c0, cdur, LANDSCAPE),
         "pan": Clip(f"{D}/assets/rakaman-pan-kaunter.mp4", 0, 6.5, PORTRAIT),
         "cars": Clip(f"{D}/assets/rakaman-closeup.mp4", 16.0, 5.0, LANDSCAPE),
+        "new_cards": Clip(f"{D}/assets/rakaman-kad-kereta.mp4", 0, 4.1, LANDSCAPE),
+        "new_cars": Clip(f"{D}/assets/rakaman-kad-kereta.mp4", 4.0, 8.0, LANDSCAPE),
     }
     ff = subprocess.Popen(
         ["ffmpeg", "-y", "-loglevel", "error",
@@ -177,10 +224,10 @@ def main():
          "-c:v", "libx264", "-crf", "21", "-pix_fmt", "yuv420p",
          "-c:a", "aac", "-shortest", "-movflags", "+faststart", out if "/" in out else f"{D}/output/{out}"],
         stdin=subprocess.PIPE)
-    for n in range(SHOTS[-1][1] * FPS):
+    for n in range(int(SHOTS[-1][1] * FPS)):
         ff.stdin.write(render(n / FPS, ctx).tobytes())
     ff.stdin.close()
-    for k in ("cards", "pan", "cars"):
+    for k in ("cards", "pan", "cars", "new_cards", "new_cars"):
         ctx[k].proc.kill()
     raise SystemExit(ff.wait())
 
