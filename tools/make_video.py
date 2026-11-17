@@ -89,17 +89,18 @@ def breaking_badge(img, t):
     d.text((x + 84, y + 14), label, font=f, fill=WHITE)
 
 
-def name_super(img, t, name):
+def name_super(img, t, name, role="Wartawan"):
     if t < 1.2 or t > 6:
         return
     d = ImageDraw.Draw(img)
     a = ease((t - 1.2) / 0.4) * (1 - ease((t - 5.6) / 0.4))
     x = 60 - 40 * (1 - a)
     f1, f2 = font(44), font(32, bold=False)
-    d.rectangle([x, 330, x + 420, 430], fill=(0, 0, 0))
+    bw = max(420, d.textlength(name.upper(), font=f1) + 60)
+    d.rectangle([x, 330, x + bw, 430], fill=(0, 0, 0))
     d.rectangle([x, 330, x + 10, 430], fill=YEL)
     d.text((x + 30, 337), name.upper(), font=f1, fill=WHITE)
-    d.text((x + 30, 387), "Wartawan", font=f2, fill=YEL)
+    d.text((x + 30, 387), role, font=f2, fill=YEL)
 
 
 def captions(img, t, cues):

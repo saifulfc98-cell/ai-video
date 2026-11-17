@@ -20,7 +20,7 @@ def shot_presenter(t, ctx, z, title, sub, name=False):
     img = ctx["host"].frame(z, 0.45, 0.45)
     mv.breaking_badge(img, t)
     if name:
-        mv.name_super(img, t, "Haslam")
+        mv.name_super(img, t, ctx["name"], ctx["role"])
     mv.lower_third(img, t - 0.3, title, sub)
     return img
 
@@ -116,7 +116,7 @@ def v2_shot3(t, ctx):
 
 
 def v2_shot4(t, ctx):
-    return shot_presenter(t, ctx, 1.12 + 0.03 * t / 6, "HASLAM MELAPORKAN",
+    return shot_presenter(t, ctx, 1.12 + 0.03 * t / 6, "AIN SALSABILA MELAPORKAN",
                           "Info terkini bersama kami")
 
 
@@ -138,10 +138,11 @@ def v2_shot5(t, ctx):
 
 VERSIONS = {
     "v1": ([(0, 8), (8, 18), (18, 28), (28, 36), (36, 40)], FNS, "captions.srt",
-           "hot-wheels-draf.mp4", (2.0, 10.5)),
+           "hot-wheels-draf.mp4", (2.0, 10.5), "presenter-reference.jpg", "Haslam", "Wartawan"),
     "v2": ([(0, 11), (11, 22), (22, 34), (34, 40), (40, 43)],
            [v2_shot1, v2_shot2, v2_shot3, v2_shot4, v2_shot5], "captions-v2.srt",
-           "hot-wheels-v2.mp4", (2.0, 7.0)),
+           "hot-wheels-v2.mp4", (2.0, 7.0), "presenter-ain.jpg", "Ain Salsabila",
+           "Pembaca Berita"),
 }
 
 
@@ -158,9 +159,9 @@ def render(t, ctx):
 
 def main():
     global SHOTS, FNS
-    SHOTS, FNS, srt, out, (c0, cdur) = VERSIONS[sys.argv[1] if len(sys.argv) > 1 else "v1"]
+    SHOTS, FNS, srt, out, (c0, cdur), host, name, role = VERSIONS[sys.argv[1] if len(sys.argv) > 1 else "v1"]
     ctx = {
-        "host": mv.Photo(f"{D}/assets/presenter-reference.jpg"),
+        "host": mv.Photo(f"{D}/assets/{host}"), "name": name, "role": role,
         "prod": mv.Photo(f"{D}/assets/produk-kaunter.jpg"),
         "cues": mv.parse_srt(f"{D}/{srt}"),
         "cards": Clip(f"{D}/assets/rakaman-closeup.mp4", c0, cdur, LANDSCAPE),
