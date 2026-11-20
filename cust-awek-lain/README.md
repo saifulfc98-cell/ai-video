@@ -16,5 +16,16 @@ Video meme POV, disunting daripada 5 klip telefon (`assets/`).
 | 20.4–27.6 s | Juruwang (drop) | SELAMAT DATANG KAKAK BARU!! 🙌 / ESOK SIAPA PULA BANG? 😂 |
 | 27.6–30 s | End card | Tag kawan yang macam ni 😂 / Part 2? 👀 |
 
+## Versi 2 (gempak): `output/cust-awek-lain-v2.mp4`
+Hasilkan semula: `python3 tools/make_cust_meme_v2.py`
+
+- **Muzik:** phonk / DJ remix 128 BPM yang dijana sendiri, jadi bebas hak cipta (`output/muzik-v2.wav`, stereo). Ada melodi cowbell, bass 808 yang "pecah", kick dan snare, hi-hat triplet, snare roll dan riser sebelum drop, dan crash.
+- **Freeze "KANTOI!" 📸:** pada klip 2, muzik berhenti. Video freeze, zoom ke muka, warna jadi merah pudar, dan ada bunyi boom dan shutter kamera.
+- **Transisi:** zoom-blur, flash dan RGB glitch pada setiap potongan.
+- **Efek ikut beat:** zoom pulse dan gegaran kamera.
+- **Sebelum drop:** zoom makin dekat, glitch, dan skrin gelap separuh beat.
+- **Drop:** frame invert, strobe dan RGB split pada setiap beat, gegaran kuat, dan hujan emoji 😂🔥💀.
+- **Sari kata:** "slam" dengan overshoot dan senget sikit.
+
 ## Kapsyen TikTok
 Regular sangat sampai staf semua dah kenal… tapi awek je tukar-tukar 😭😂 #fyp #pov #regularcustomer #lawak #malaysia
